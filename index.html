@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flying Flea — First Flight | Bike Delivery Event</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,500;0,600;0,800;1,400;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --neon:#D0FD0A;
+  --neon-2:#CFFF04;
+  --neon-3:#C2FF01;
+  --ink:#111418;
+  --ink-2:#151517;
+  --paper:#BDBDBD;
+  --slate:#606870;
+  --off-white:#F5F5F0;
+  --white:#FFFFFF;
+  --font-d:'Barlow Condensed',sans-serif;
+  --font-b:'DM Sans',sans-serif;
+  --assets:'FF - Bike Delivery Event_assets';
+  --topbar-h:74px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:var(--ink);
+  color:var(--off-white);
+  font-family:var(--font-b);
+  line-height:1.55;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ---------- progress + topbar ---------- */
+#progressBar{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--neon);z-index:200;transition:width .1s linear}
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(16px,4vw,48px);
+  background:rgba(17,20,24,.72);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  z-index:190;
+}
+.topbar__logo{height:20px;width:auto;filter:drop-shadow(0 0 12px rgba(208,253,10,.25))}
+.topbar__nav{display:flex;gap:28px;list-style:none}
+.topbar__nav button{
+  font-family:var(--font-d);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  font-size:13px;color:var(--off-white);opacity:.65;transition:opacity .2s,color .2s;
+  padding:6px 0;position:relative;
+}
+.topbar__nav button::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--neon);transition:width .25s}
+.topbar__nav button.active,.topbar__nav button:hover{opacity:1;color:var(--neon)}
+.topbar__nav button.active::after{width:100%}
+.menu-toggle{display:none;width:40px;height:40px;align-items:center;justify-content:center;flex-direction:column;gap:5px}
+.menu-toggle span{display:block;width:22px;height:2px;background:var(--off-white);transition:transform .25s,opacity .25s}
+.menu-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-toggle.open span:nth-child(2){opacity:0}
+.menu-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+.mobile-nav{
+  position:fixed;inset:var(--topbar-h) 0 0 0;background:rgba(10,11,13,.98);
+  z-index:180;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+}
+.mobile-nav.open{opacity:1;transform:translateY(0);pointer-events:auto}
+.mobile-nav button{font-family:var(--font-d);font-size:28px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--off-white)}
+.mobile-nav button:hover,.mobile-nav button.active{color:var(--neon)}
+
+@media (max-width:820px){
+  .topbar__nav{display:none}
+  .menu-toggle{display:flex}
+}
+
+/* ---------- side dot nav (desktop) ---------- */
+.side-nav{position:fixed;right:26px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:16px}
+.side-nav button{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .25s,transform .25s;position:relative}
+.side-nav button.active{background:var(--neon);transform:scale(1.35)}
+.side-nav button .tip{
+  position:absolute;right:20px;top:50%;transform:translateY(-50%);
+  font-family:var(--font-d);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;background:var(--ink-2);padding:4px 10px;border-radius:3px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.side-nav button:hover .tip{opacity:1}
+@media (max-width:820px){.side-nav{display:none}}
+
+/* ---------- back to top ---------- */
+.back-to-top{
+  position:fixed;bottom:26px;right:26px;width:46px;height:46px;border-radius:50%;
+  background:var(--neon);color:var(--ink);font-size:18px;font-weight:700;z-index:150;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s;
+  box-shadow:0 6px 20px rgba(208,253,10,.25);
+}
+.back-to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+/* ---------- layout base ---------- */
+main{padding-top:var(--topbar-h)}
+.slide{position:relative;padding:100px clamp(20px,6vw,90px);overflow:hidden}
+.slide--dark{background:var(--ink)}
+.slide--panel{background:var(--ink-2)}
+.slide--paper{background:var(--paper);color:var(--ink-2)}
+.slide--paper .footnote{color:#4b4f54}
+.slide--tight{padding-top:60px;padding-bottom:60px}
+.slide--center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:78vh}
+.wrap{max-width:1180px;margin:0 auto;position:relative;z-index:2}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in-view{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+.eyebrow{
+  font-family:var(--font-d);font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  font-size:13px;color:var(--neon-2);margin-bottom:18px;display:block;
+}
+.slide--paper .eyebrow{color:#5b6a12}
+
+h1,h2,h3{font-family:var(--font-d);font-weight:800;text-transform:none;line-height:1.02;letter-spacing:-.01em}
+.display-xl{font-size:clamp(48px,9vw,128px)}
+.display-lg{font-size:clamp(38px,6.4vw,84px)}
+.display-md{font-size:clamp(30px,4.4vw,52px)}
+.display-sm{font-size:clamp(22px,2.8vw,32px)}
+.sub{font-family:var(--font-d);font-weight:400;font-size:clamp(20px,2.6vw,30px);color:var(--off-white);margin-top:18px}
+.slide--paper .sub{color:var(--ink-2)}
+p.body-lg{font-size:clamp(16px,1.6vw,19px);max-width:62ch;color:#d8d8d2}
+.slide--paper p.body-lg{color:#2c2f33}
+.numeral{font-family:Georgia,'Times New Roman',serif;font-style:italic;color:var(--neon-2);font-size:clamp(40px,5vw,64px);line-height:1}
+button.numeral{transition:transform .2s,color .2s}
+button.numeral:hover{transform:translateY(-3px);color:var(--neon)}
+.footnote{font-family:var(--font-b);font-style:italic;font-size:12.5px;color:#9a9a95;margin-top:14px}
+
+/* ---------- full-bleed hero/divider ---------- */
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img,.bleed .gif-img{width:100%;height:100%;object-fit:cover}
+.bleed::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,13,.35),rgba(10,11,13,.78));z-index:1}
+.slide--hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center}
+.slide--hero .wrap{max-width:900px}
+
+/* ---------- gif play/pause stage ---------- */
+.gif-stage{position:absolute;inset:0}
+.gif-stage img,.gif-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gif-stage canvas{display:none}
+.gif-toggle{
+  position:absolute;bottom:26px;right:clamp(20px,6vw,90px);z-index:3;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(17,20,24,.65);border:1px solid rgba(208,253,10,.5);color:var(--neon);
+  font-family:var(--font-d);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+  padding:9px 16px;border-radius:30px;backdrop-filter:blur(6px);
+}
+.gif-toggle:hover{background:rgba(208,253,10,.12)}
+
+/* ---------- cards / accordions ---------- */
+.card-grid{display:grid;gap:18px;margin-top:44px}
+.card-grid--3{grid-template-columns:repeat(3,1fr)}
+.card-grid--4{grid-template-columns:repeat(2,1fr)}
+@media (max-width:900px){.card-grid--3,.card-grid--4{grid-template-columns:1fr}}
+
+.card{background:rgba(17,20,24,.9);border:1px solid rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.slide--paper .card{background:var(--ink-2);border-color:rgba(255,255,255,.05)}
+.card__head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 24px;text-align:left}
+.card__label{font-family:var(--font-d);font-weight:700;font-size:20px;letter-spacing:.03em;color:var(--neon-2)}
+.card__icon{font-size:22px;color:var(--neon);flex-shrink:0;transition:transform .3s}
+.card.is-collapsed .card__icon{transform:rotate(45deg)}
+.card__body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s ease}
+.card.is-collapsed .card__body{grid-template-rows:0fr}
+.card__body>div{overflow:hidden}
+.card__body p{padding:0 24px 22px;color:#cfcfca;font-size:15px}
+
+/* ---------- three-act breakdown ---------- */
+.act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:50px}
+@media (max-width:820px){.act-grid{grid-template-columns:1fr}}
+.act-col .numeral{display:block;margin-bottom:10px}
+.act-col .act-label{font-family:var(--font-d);font-weight:800;font-size:22px;letter-spacing:.02em;color:var(--off-white);margin-bottom:4px}
+.act-col .act-phase{font-family:var(--font-d);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--neon-2);margin-bottom:14px;display:block}
+.act-col p{color:#5c5c58;font-size:15px}
+
+/* ---------- story slide (approach/drop) ---------- */
+.story{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center}
+@media (max-width:900px){.story{grid-template-columns:1fr}}
+.story__media{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/5;background:#000}
+.story__media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.story__media .chip{position:absolute;left:16px;bottom:16px;width:64px;opacity:.9}
+.story .numeral{margin-top:36px;display:inline-block}
+.crate-list{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.crate-list li{display:flex;align-items:flex-start;gap:12px;font-size:15.5px;color:#dedeD9}
+.crate-list input[type=checkbox]{appearance:none;width:19px;height:19px;flex-shrink:0;margin-top:2px;border:2px solid var(--neon-2);border-radius:3px;position:relative;cursor:pointer}
+.crate-list input[type=checkbox]:checked{background:var(--neon-2)}
+.crate-list input[type=checkbox]:checked::after{content:"";position:absolute;left:4px;top:0px;width:5px;height:10px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.crate-list li.checked span{text-decoration:line-through;color:#8a8a86}
+.crate-list-title{font-family:var(--font-d);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:15px;color:var(--neon-2)}
+
+/* ---------- recap block (main-event sub slides) ---------- */
+.recap{border-left:2px solid rgba(208,253,10,.4);padding-left:22px;margin-top:26px;color:#9d9d97;font-size:14.5px;max-width:56ch}
+.sub-heading{font-family:var(--font-d);font-weight:600;font-size:clamp(22px,3vw,34px);color:var(--neon-2);margin-top:8px}
+
+/* ---------- galleries ---------- */
+.gallery{display:grid;gap:14px;margin-top:20px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.gallery figure{position:relative;border-radius:6px;overflow:hidden;aspect-ratio:3/4;background:#000}
+.gallery img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .5s}
+.gallery img:hover{transform:scale(1.04)}
+
+/* ---------- lightbox ---------- */
+.lightbox{position:fixed;inset:0;background:rgba(6,7,8,.94);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.lightbox.open{opacity:1;pointer-events:auto}
+.lightbox img{max-width:90vw;max-height:86vh;object-fit:contain;border-radius:4px}
+.lightbox__close{position:absolute;top:22px;right:26px;font-size:34px;color:var(--off-white);width:44px;height:44px}
+
+/* ---------- cover slide ---------- */
+.cover{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink)}
+.cover__logo{width:min(60vw,340px)}
+.cover__rule{width:1px;height:60px;background:rgba(255,255,255,.6);margin:26px auto}
+
+/* ---------- venue / divider text-only ---------- */
+.divider-title{font-size:clamp(30px,6vw,74px);text-align:center;max-width:1000px}
+.stations-eyebrow{margin-bottom:8px}
+
+/* ---------- station grid custom (slide 10) ---------- */
+.stations{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:46px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+@media (max-width:820px){.stations{grid-template-columns:1fr}}
+.station{background:var(--ink-2);padding:34px}
+.station h3{font-size:18px;letter-spacing:.05em;color:var(--neon-2);margin-bottom:12px;font-family:var(--font-d);font-weight:700}
+.station p{font-size:14.5px;color:#c9c9c4}
+
+/* footer */
+.site-footer{padding:70px clamp(20px,6vw,90px) 90px;text-align:center;background:var(--ink)}
+.site-footer img{width:150px;margin:0 auto 18px;opacity:.9}
+.site-footer p{font-size:12.5px;color:#6c6c68;font-family:var(--font-d);letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<header class="topbar">
+  <img class="topbar__logo" src="assets/image37.png" alt="Flying Flea">
+  <ul class="topbar__nav" id="topNav" role="list">
+    <li><button data-jump="s02">First Flight</button></li>
+    <li><button data-jump="s04">Three Acts</button></li>
+    <li><button data-jump="s09">Main Event</button></li>
+    <li><button data-jump="s22">Other Ideas</button></li>
+    <li><button data-jump="s24">Venue</button></li>
+  </ul>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button data-jump="s02">First Flight</button>
+  <button data-jump="s04">Three Acts</button>
+  <button data-jump="s09">Main Event</button>
+  <button data-jump="s22">Other Ideas</button>
+  <button data-jump="s24">Venue</button>
+</nav>
+
+<nav class="side-nav" id="sideNav">
+  <button data-jump="s02"><span class="tip">First Flight</span></button>
+  <button data-jump="s04"><span class="tip">Three Acts</span></button>
+  <button data-jump="s09"><span class="tip">Main Event</span></button>
+  <button data-jump="s22"><span class="tip">Other Ideas</span></button>
+  <button data-jump="s24"><span class="tip">Venue</span></button>
+</nav>
+
+<main>
+
+<section id="s01" class="slide cover">
+  <div class="bleed"><img src="assets/image1.png" alt="" loading="lazy"></div>
+  <div class="wrap reveal" style="text-align:center">
+    <img class="cover__logo" src="assets/image8.png" alt="Tessarakt">
+    <div class="cover__rule"></div>
+  </div>
+</section>
+
+<section id="s02" class="slide slide--hero slide--dark" data-navsection>
+  <div class="gif-stage" data-src="assets/image42.gif">
+    <img class="gif-img" alt="Flying Flea wordmark animation">
+    <canvas class="gif-freeze"></canvas>
+  </div>
+  <div class="bleed" style="z-index:0"></div>
+  <button class="gif-toggle" type="button" aria-pressed="true">Pause</button>
+  <div class="wrap reveal">
+    <h1 class="display-xl">FIRST FLIGHT</h1>
+    <p class="sub">The C6 doesn't get delivered. It arrives.</p>
+  </div>
+</section>
+
+<section id="s03" class="slide slide--paper" data-navsection>
+  <div class="wrap">
+    <h2 class="display-lg reveal">A delivery event that doesn't feel like one.</h2>
+    <div class="card-grid card-grid--3 reveal">
+      <div class="card">
+        <button class="card__head" aria-expanded="true">
+          <span class="card__label">IMMERSIVE</span><span class="card__icon">–</span>
+        </button>
+        <div class="card__body"><div><p>Move past the conventional handover. Build a world the C6 belongs to, not a stage to stand on.</p></div></div>
+      </div>
+      <div class="card">
+        <button class="card__head" aria-expanded="true">
+          <span class="card__label">PREMIUM</span><span class="card__icon">–</span>
+        </button>
+        <div class="card__body"><div><p>Confidence through restraint. No glitter, no podium. The kind of room you'd photograph even if it were empty.</p></div></div>
+      </div>
+      <div class="card">
+        <button class="card__head" aria-expanded="true">
+          <span class="card__label">SHAREABLE</span><span class="card__icon">–</span>
+        </button>
+        <div class="card__body"><div><p>Engineer moments that earn the post. Every owner is the hero of their own shot, not a guest at someone else's launch.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s04" class="slide slide--hero slide--dark" data-navsection>
+  <div class="bleed"><img src="assets/image38.png" alt="" loading="lazy"></div>
+  <div class="wrap reveal" style="text-align:center;max-width:1000px">
+    <h1 class="divider-title">THREE ACTS. ONE STORY</h1>
+  </div>
+</section>
+
+<section id="s05" class="slide slide--paper">
+  <div class="wrap">
+    <h2 class="display-lg reveal">Three Acts. One Story.</h2>
+    <div class="act-grid reveal">
+      <div class="act-col">
+        <button class="numeral" data-jump="s06">I</button>
+        <span class="act-label">THE APPROACH</span>
+        <span class="act-phase">Pre-event</span>
+        <p>City-wide teaser. Parachute imagery seeded across rooftops, walls, social. A vintage PR drop kit arrives at each owner's door.</p>
+      </div>
+      <div class="act-col">
+        <button class="numeral" data-jump="s12">II</button>
+        <span class="act-label">THE DROP</span>
+        <span class="act-phase">Main-Event</span>
+        <p>Arrival, welcome, engagement zone, the reveal moment, the handover.</p>
+      </div>
+      <div class="act-col">
+        <span class="numeral">III</span>
+        <span class="act-label">THE FLIGHT</span>
+        <span class="act-phase">Post-event</span>
+        <p>Cinematic aftermovie. Owner photo deliveries. Content creation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s06" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">The approach</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image11.png" alt="Parachute teaser reference image" loading="lazy">
+        <img class="chip" src="assets/image2.png" alt="">
+      </div>
+      <div>
+        <h2 class="display-md">Something is about to drop.</h2>
+        <p class="body-lg" style="margin-top:20px">A week before, Bengaluru wakes up to parachutes. Wheat-paste on walls. No logo. Just the silhouette and a countdown.</p>
+        <p class="body-lg" style="margin-top:14px;color:#9a9a95;font-size:14.5px">Anamorphic billboards that look like a Flea is dropping into your lap.</p>
+        <span class="numeral">I</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s07" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">The approach</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image12.png" alt="Wooden crate with F6 scale model" loading="lazy">
+        <img class="chip" src="assets/image2.png" alt="">
+      </div>
+      <div>
+        <h2 class="display-md">The First drop</h2>
+        <p class="body-lg" style="margin-top:20px">Before the main event, a miniature wooden crate arrives at each owner's doorstep, sparking massive curiosity and FOMO across social media. Inside, they find a collector's scale-model F6 and a vintage-style airmail envelope containing the exclusive digital code required to activate their high-performance machine.</p>
+        <span class="numeral">I</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s08" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">The approach</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image4.png" alt="Crate hand-stenciled with owner name" loading="lazy">
+        <img class="chip" src="assets/image2.png" alt="">
+      </div>
+      <div>
+        <h2 class="display-md">You've been selected for the drop.</h2>
+        <p class="body-lg" style="margin-top:20px">A week before the event, every C6 owner, plus 30 chosen press, riders and creators, receives a military-spec wooden crate, hand-stenciled with their name and a drop number.</p>
+        <p class="crate-list-title" style="margin-top:26px">Inside the crate</p>
+        <ul class="crate-list" id="crateList">
+          <li><input type="checkbox"><span>Vintage air-mail invitation, hand-typed</span></li>
+          <li><input type="checkbox"><span>Embroidered Flying Flea patch (numbered)</span></li>
+          <li><input type="checkbox"><span>Enamel parachute pin</span></li>
+          <li><input type="checkbox"><span>Hand-folded silk square (parachute fabric)</span></li>
+          <li><input type="checkbox"><span>Tin of pressed-butter biscuits, ration-style</span></li>
+          <li><input type="checkbox"><span>Coordinates of the venue. Nothing else.</span></li>
+        </ul>
+        <span class="numeral" style="margin-top:26px;display:inline-block">I</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s09" class="slide slide--hero slide--dark" data-navsection>
+  <div class="gif-stage" data-src="assets/image36.gif">
+    <img class="gif-img" alt="Main event animation">
+    <canvas class="gif-freeze"></canvas>
+  </div>
+  <div class="bleed" style="z-index:0"></div>
+  <button class="gif-toggle" type="button" aria-pressed="true">Pause</button>
+  <div class="wrap reveal" style="text-align:center;max-width:1000px">
+    <h1 class="divider-title">MAIN EVENT</h1>
+  </div>
+</section>
+
+<section id="s10" class="slide slide--paper">
+  <div class="wrap">
+    <span class="eyebrow stations-eyebrow reveal">The Drop</span>
+    <h2 class="display-lg reveal">Four stations. Every one of them earns a post.</h2>
+    <div class="stations reveal">
+      <div class="station">
+        <h3>FF COFFEE STATION</h3>
+        <p>The FF Coffee Lab serves as a high-octane fueling station with precision-crafted artisan blends, like Subko or Blue Tokai.</p>
+      </div>
+      <div class="station">
+        <h3>LIFT THE FLEA</h3>
+        <p>Challenge the kerb weight of the F6; earn an "I Lifted The Flea" commemorative patch.</p>
+      </div>
+      <div class="station">
+        <h3>STYLE YOUR HELMET</h3>
+        <p>Live personalization with partnered artists who help you style your helmet according to your style.</p>
+      </div>
+      <div class="station">
+        <h3>THE PORTRAIT STUDIO</h3>
+        <p>Professional studio session. Owners photographed with their new bike, with high-quality prints delivered the next day.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s11" class="slide slide--panel slide--tight">
+  <div class="wrap">
+    <div class="gallery reveal">
+      <figure><img data-lightbox src="assets/image10.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image3.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image5.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image6.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image7.png" alt="" loading="lazy"></figure>
+    </div>
+    <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+  </div>
+</section>
+
+<section id="s12" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">The Drop</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image15.png" alt="Crate unboxing reference" loading="lazy">
+        <img class="chip" src="assets/image2.png" alt="">
+      </div>
+      <div>
+        <h2 class="display-md">Uncrate the History</h2>
+        <p class="body-lg" style="margin-top:20px">Each F6 arrives the way the original Flea did in World War II, sealed inside a raw wooden crate, stamped with military stencils and wartime markings, exactly as paratroopers received them before D-Day drops. Break it open, and the inside walls reveal a limited-edition art piece commissioned exclusively for that bike, yours to frame, keep, or hang. The crate is the first chapter of your ownership story.</p>
+        <span class="numeral">II</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s13" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Main-event</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image12.png" alt="Drone key delivery reference" loading="lazy">
+        <img class="chip" src="assets/image2.png" alt="">
+      </div>
+      <div>
+        <h2 class="display-md">Pick the drop in style</h2>
+        <p class="body-lg" style="margin-top:20px">Each owner receives their keys inside a tiny wooden crate, which also holds a miniature F6 scale model. Above the crowd, 80 drones perform a spectacular show, painting the Flying Flea logo in the sky before one drone descends to hand-deliver the key crate directly to the new owner.</p>
+        <span class="numeral">II</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s14" class="slide slide--hero slide--dark" data-navsection>
+  <div class="bleed"><img src="assets/image39.png" alt="" loading="lazy"></div>
+  <div class="wrap reveal" style="text-align:center;max-width:1000px">
+    <h1 class="divider-title">SEXY SCIENCE AT A CAFE/BREWERY</h1>
+  </div>
+</section>
+
+<section id="s15" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Main-event</span>
+    <h2 class="display-md reveal">Pick the drop in style</h2>
+    <p class="recap reveal">Each owner receives their keys inside a tiny wooden crate, which also holds a miniature F6 scale model. Above the crowd, 80 drones perform a spectacular show, painting the Flying Flea logo in the sky before one drone descends to hand-deliver the key crate directly to the new owner.</p>
+    <div class="story reveal" style="margin-top:40px">
+      <div class="story__media">
+        <img data-lightbox src="assets/image13.png" alt="FF Cafe/Club takeover" loading="lazy">
+      </div>
+      <div>
+        <h3 class="sub-heading">The FF Cafe/Club takeover</h3>
+        <p class="body-lg" style="margin-top:16px">The Vibe as guests step into the brewery, the modern world vanishes. They are greeted by the smell of roasted coffee and aged leather. The space is a blend of industrial grit and artisanal warmth, think raw Edison bulbs draped in heavy canvas, hand-stitched leather coasters, and rustic wooden installations. This isn't a showroom; it's a living, breathing HQ for the Flying Flea community.</p>
+        <span class="numeral" style="margin-top:26px;display:inline-block">II</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s16" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Main-event</span>
+    <h2 class="display-md reveal">Pick the drop in style</h2>
+    <p class="recap reveal">Each owner receives their keys inside a tiny wooden crate, which also holds a miniature F6 scale model. Above the crowd, 80 drones perform a spectacular show, painting the Flying Flea logo in the sky before one drone descends to hand-deliver the key crate directly to the new owner.</p>
+    <div class="story reveal" style="margin-top:40px">
+      <div class="story__media">
+        <img data-lightbox src="assets/image29.png" alt="FF Staff" loading="lazy">
+      </div>
+      <div>
+        <h3 class="sub-heading">The FF Staff</h3>
+        <p class="body-lg" style="margin-top:16px">Servers and staff are dressed in period-accurate mechanic jumpsuits and field caps, staying "in character" as the support crew for the new fleet. They don't just take orders; they "brief" the guests.</p>
+        <span class="numeral" style="margin-top:26px;display:inline-block">II</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s17" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Main-event</span>
+    <h2 class="display-md reveal">Pick the drop in style</h2>
+    <p class="recap reveal">Each owner receives their keys inside a tiny wooden crate, which also holds a miniature F6 scale model. Above the crowd, 80 drones perform a spectacular show, painting the Flying Flea logo in the sky before one drone descends to hand-deliver the key crate directly to the new owner.</p>
+    <div class="story reveal" style="margin-top:40px">
+      <div class="story__media">
+        <img data-lightbox src="assets/image16.png" alt="FF Menus" loading="lazy">
+      </div>
+      <div>
+        <h3 class="sub-heading">The FF Menus</h3>
+        <p class="body-lg" style="margin-top:16px">A custom-curated menu featuring "The Paratrooper Brew" (extra-strength espresso) and craft beers named after historic drop zones. Food is served in polished metal mess tins, elevated with gourmet presentations.</p>
+        <span class="numeral" style="margin-top:26px;display:inline-block">II</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s18" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Main-event</span>
+    <h2 class="display-md reveal">Pick the drop in style</h2>
+    <p class="recap reveal">Each owner receives their keys inside a tiny wooden crate, which also holds a miniature F6 scale model. Above the crowd, 80 drones perform a spectacular show, painting the Flying Flea logo in the sky before one drone descends to hand-deliver the key crate directly to the new owner.</p>
+    <div class="story reveal" style="margin-top:40px">
+      <div class="story__media">
+        <img data-lightbox src="assets/image18.png" alt="FF bestie keychain" loading="lazy">
+      </div>
+      <div>
+        <h3 class="sub-heading">FF bestie</h3>
+        <p class="body-lg" style="margin-top:16px">A master artisan hand-assembles custom keychains using heavy-duty military canvas and premium aged leather, inspired by the rugged 1950s gear. Owners watch as their initials are hand-stamped.</p>
+        <span class="numeral" style="margin-top:26px;display:inline-block">II</span>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s19" class="slide slide--dark">
+  <div class="wrap">
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image17.png" alt="Photo Op headlamp installation" loading="lazy">
+      </div>
+      <div>
+        <h2 class="display-lg">Photo Op</h2>
+        <p class="body-lg" style="margin-top:20px">The classic headlamp reimagined as the famous convex. We can place this in all the high footfall places.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s20" class="slide slide--panel">
+  <div class="wrap">
+    <h2 class="display-lg reveal">Photo Op</h2>
+    <div class="gallery reveal">
+      <figure><img data-lightbox src="assets/image21.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image23.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image25.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image35.png" alt="" loading="lazy"></figure>
+    </div>
+    <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+  </div>
+</section>
+
+<section id="s21" class="slide slide--dark slide--tight">
+  <div class="wrap">
+    <div class="gallery reveal" style="grid-template-columns:1fr">
+      <figure style="aspect-ratio:16/9"><img data-lightbox src="assets/image27.png" alt="" loading="lazy"></figure>
+    </div>
+    <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+  </div>
+</section>
+
+<section id="s22" class="slide slide--hero slide--dark" data-navsection>
+  <div class="bleed"><img src="assets/image24.png" alt="" loading="lazy"></div>
+  <div class="wrap reveal" style="text-align:center;max-width:1000px">
+    <h1 class="divider-title">OTHER IDEAS</h1>
+  </div>
+</section>
+
+<section id="s23" class="slide slide--dark">
+  <div class="wrap">
+    <span class="eyebrow reveal">Intellectual Property</span>
+    <div class="story reveal">
+      <div class="story__media">
+        <img data-lightbox src="assets/image28.png" alt="The Drop Zone Festival" loading="lazy">
+      </div>
+      <div>
+        <h2 class="display-lg">The Drop Zone Festival</h2>
+        <p class="body-lg" style="margin-top:20px">Every quarter, we transform a raw industrial warehouse or open urban space into "The Drop Zone, a high-energy community festival. This isn't just a delivery; it's an exclusive takeover where owners, press, and influencers converge for a day of industrial art, local music, and the headline moment: the unboxing of the latest F6 batch.</p>
+        <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s24" class="slide slide--hero slide--dark" data-navsection>
+  <div class="bleed"><img src="assets/image24.png" alt="" loading="lazy"></div>
+  <div class="wrap reveal" style="text-align:center;max-width:1000px">
+    <h1 class="divider-title">VENUE- SUNBURN UNION, Koramangala</h1>
+  </div>
+</section>
+
+<section id="s25" class="slide slide--panel slide--tight">
+  <div class="wrap">
+    <div class="gallery reveal">
+      <figure><img data-lightbox src="assets/image30.png" alt="" loading="lazy"></figure>
+      <figure><img data-lightbox src="assets/image31.png" alt="" loading="lazy"></figure>
+    </div>
+    <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+  </div>
+</section>
+
+<section id="s26" class="slide slide--dark slide--tight">
+  <div class="wrap">
+    <div class="gallery reveal" style="grid-template-columns:1fr">
+      <figure style="aspect-ratio:16/9"><img data-lightbox src="assets/image33.png" alt="" loading="lazy"></figure>
+    </div>
+    <p class="footnote">*This is an Ai generated image, for reference purposes only</p>
+  </div>
+</section>
+
+<section id="s27" class="slide slide--dark slide--tight">
+  <div class="bleed" style="position:relative;aspect-ratio:16/9">
+    <img data-lightbox src="assets/image32.png" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">
+  </div>
+</section>
+
+<section id="s28" class="slide slide--dark slide--tight">
+  <div class="bleed" style="position:relative;aspect-ratio:16/9">
+    <img data-lightbox src="assets/image34.png" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <img src="assets/image37.png" alt="Flying Flea">
+  <p>Flying Flea — Bike Delivery Event</p>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox__close" id="lightboxClose" aria-label="Close">×</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* progress bar */
+  var progressBar = document.getElementById('progressBar');
+  function updateProgress(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    progressBar.style.width = (max > 0 ? (scrolled/max*100) : 0) + '%';
+  }
+  document.addEventListener('scroll', updateProgress, {passive:true});
+  updateProgress();
+
+  /* smooth jump */
+  function jumpTo(id){
+    var el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'});
+  }
+  document.querySelectorAll('[data-jump]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      jumpTo(btn.getAttribute('data-jump'));
+      closeMobileNav();
+    });
+  });
+
+  /* mobile menu */
+  var menuToggle = document.getElementById('menuToggle');
+  var mobileNav = document.getElementById('mobileNav');
+  function closeMobileNav(){
+    menuToggle.classList.remove('open');
+    mobileNav.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded','false');
+  }
+  menuToggle.addEventListener('click', function(){
+    var open = mobileNav.classList.toggle('open');
+    menuToggle.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+  });
+
+  /* active nav state via observing marker sections */
+  var navSections = Array.prototype.slice.call(document.querySelectorAll('[data-navsection]'));
+  var navButtons = document.querySelectorAll('.topbar__nav button, .side-nav button, .mobile-nav button');
+  function setActive(id){
+    navButtons.forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-jump') === id);
+    });
+  }
+  if('IntersectionObserver' in window){
+    var navObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, {rootMargin:'-45% 0px -45% 0px'});
+    navSections.forEach(function(s){ navObserver.observe(s); });
+
+    /* reveal on scroll */
+    var revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.15, rootMargin:'0px 0px -60px 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){ revealObserver.observe(el); });
+
+    /* lazy gif loading */
+    var gifObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var stage = entry.target;
+          var img = stage.querySelector('.gif-img');
+          if(!img.src){ img.src = stage.getAttribute('data-src'); }
+          gifObserver.unobserve(stage);
+        }
+      });
+    }, {rootMargin:'400px 0px'});
+    document.querySelectorAll('.gif-stage').forEach(function(s){ gifObserver.observe(s); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in-view'); });
+    document.querySelectorAll('.gif-stage').forEach(function(s){
+      s.querySelector('.gif-img').src = s.getAttribute('data-src');
+    });
+  }
+
+  /* back to top */
+  var backToTop = document.getElementById('backToTop');
+  document.addEventListener('scroll', function(){
+    backToTop.classList.toggle('show', window.scrollY > 900);
+  }, {passive:true});
+  backToTop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior: reduceMotion ? 'auto' : 'smooth'});
+  });
+
+  /* accordion cards */
+  document.querySelectorAll('.card__head').forEach(function(head){
+    head.addEventListener('click', function(){
+      var card = head.closest('.card');
+      var collapsed = card.classList.toggle('is-collapsed');
+      head.setAttribute('aria-expanded', String(!collapsed));
+      head.querySelector('.card__icon').textContent = collapsed ? '+' : '–';
+    });
+  });
+
+  /* crate checklist */
+  document.querySelectorAll('#crateList li').forEach(function(li){
+    var cb = li.querySelector('input[type=checkbox]');
+    cb.addEventListener('change', function(){
+      li.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  /* lightbox */
+  var lightbox = document.getElementById('lightbox');
+  var lightboxImg = document.getElementById('lightboxImg');
+  function openLightbox(src, alt){
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || '';
+    lightbox.classList.add('open');
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('[data-lightbox]').forEach(function(img){
+    img.addEventListener('click', function(){ openLightbox(img.src, img.alt); });
+  });
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e){ if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
+
+  /* gif play/pause toggle */
+  document.querySelectorAll('.gif-stage').forEach(function(stage){
+    var img = stage.querySelector('.gif-img');
+    var canvas = stage.querySelector('.gif-freeze');
+    var ctx = canvas.getContext('2d');
+    var btn = stage.parentElement.querySelector('.gif-toggle');
+    var playing = true;
+
+    function freeze(){
+      try{
+        canvas.width = img.naturalWidth || img.clientWidth || 800;
+        canvas.height = img.naturalHeight || img.clientHeight || 450;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }catch(e){}
+      canvas.style.display = 'block';
+      img.style.visibility = 'hidden';
+    }
+    function resume(){
+      canvas.style.display = 'none';
+      img.style.visibility = 'visible';
+      var src = stage.getAttribute('data-src');
+      img.src = '';
+      requestAnimationFrame(function(){
+        img.src = src + (src.indexOf('?') > -1 ? '&' : '?') + '_r=' + Date.now();
+      });
+    }
+    if(btn){
+      if(reduceMotion){
+        playing = false;
+        btn.textContent = 'Play';
+        btn.setAttribute('aria-pressed','false');
+        img.addEventListener('load', freeze, {once:true});
+      }
+      btn.addEventListener('click', function(){
+        playing = !playing;
+        btn.textContent = playing ? 'Pause' : 'Play';
+        btn.setAttribute('aria-pressed', String(playing));
+        if(playing) resume(); else freeze();
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>
